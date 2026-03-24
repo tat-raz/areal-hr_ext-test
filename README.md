@@ -39,7 +39,7 @@
 ---
 ### Схема базы данных
 
-<img width="1654" height="1169" alt="Схема БД drawio" src="https://github.com/user-attachments/assets/25544fd2-1553-4fef-ada8-8b0c227fea5f" />
+<img width="1654" height="1169" alt="Схема БД drawio" src="https://github.com/user-attachments/assets/712419be-5f69-4367-a4e1-0e2613958924" />
 
 ---
 
