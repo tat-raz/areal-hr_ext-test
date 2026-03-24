@@ -37,9 +37,14 @@
 - joi — валидация
 
 ---
+### Схема базы данных
+
+<img width="1654" height="1169" alt="Схема БД drawio" src="https://github.com/user-attachments/assets/25544fd2-1553-4fef-ada8-8b0c227fea5f" />
+
+---
 
 
-## 🔧 Работа с Git
+## Работа с Git
 
 В проекте используется система контроля версий Git.
 
