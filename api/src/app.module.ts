@@ -5,12 +5,13 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { PositionsModule } from './positions/positions.module';
 import { DatabaseService } from './database/database.service';
+import { DatabaseModule } from './database/database.module';
 
 
 @Module({
-    imports: [OrganizationsModule, DepartmentsModule, PositionsModule, ],
+    imports: [OrganizationsModule, DepartmentsModule, PositionsModule, DatabaseModule],
     controllers: [AppController],
-    providers: [AppService, DatabaseService],
+    providers: [AppService],
   })
 
 export class AppModule {}
