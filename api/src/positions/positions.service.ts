@@ -26,23 +26,27 @@ export class PositionsService {
 
   async create(dto: CreatePositionDto) {
     const result = await this.db.query(
-      `INSERT INTO positions
-       (name, created_at, updated_at)
-       VALUES ($1, NOW(), NOW())
-       RETURNING *`,
-      [dto.name],
+      `INSERT INTO positions 
+      (name, comment, created_at, updated_at)
+      VALUES ($1, $2, NOW(), NOW())`,
+      [dto.name, dto.comment ?? null],
     );
     return result.rows[0];
   }
 
   async update(id: number, dto: UpdatePositionDto) {
     const fields: string[] = [];
-    const values: (string | number)[] = [];
+    const values: (string | number | null)[] = [];
     let index = 1;
 
     if (dto.name !== undefined) {
       fields.push(`name = $${index++}`);
       values.push(dto.name);
+    }
+
+    if (dto.comment !== undefined) {
+      fields.push(`comment = $${index++}`);
+      values.push(dto.comment);
     }
 
     fields.push(`updated_at = NOW()`);

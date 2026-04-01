@@ -27,10 +27,14 @@ export class DepartmentsService {
   async create(dto: CreateDepartmentDto) {
     const result = await this.db.query(
       `INSERT INTO departments
-       (name, organization_id, parent_id, created_at, updated_at)
-       VALUES ($1, $2, $3, NOW(), NOW())
-       RETURNING *`,
-      [dto.name, dto.organization_id, dto.parent_id ?? null],
+      (name, organization_id, parent_id, comment, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, NOW(), NOW())`,
+      [
+        dto.name,
+        dto.organization_id,
+        dto.parent_id ?? null,
+        dto.comment ?? null,
+      ],
     );
     return result.rows[0];
   }
@@ -53,6 +57,11 @@ export class DepartmentsService {
     if (dto.parent_id !== undefined) {
       fields.push(`parent_id = $${index++}`);
       values.push(dto.parent_id);
+    }
+
+    if (dto.comment !== undefined) {
+      fields.push(`comment = $${index++}`);
+      values.push(dto.comment);
     }
 
     fields.push(`updated_at = NOW()`);
