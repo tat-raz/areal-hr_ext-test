@@ -1,23 +1,52 @@
 exports.up = (pgm) => {
+  const baseColumns = {
+    id: { type: 'serial', primaryKey: true },
+    name: { type: 'varchar(255)', notNull: true },
+    comment: { type: 'text' },
+    created_at: {
+      type: 'timestamp with time zone',
+      notNull: true,
+      default: pgm.func('now()'),
+    },
+    updated_at: {
+      type: 'timestamp with time zone',
+      notNull: true,
+      default: pgm.func('now()'),
+    },
+    deleted_at: {
+      type: 'timestamp with time zone',
+      notNull: false,
+      default: null,
+    },
+  };
+
   pgm.createTable('organizations', {
-    id: {
-      type: 'serial',
-      primaryKey: true
+    ...baseColumns,
+  });
+
+  pgm.createTable('positions', {
+    ...baseColumns,
+  });
+
+  pgm.createTable('departments', {
+    ...baseColumns,
+    organization_id: {
+      type: 'integer',
+      notNull: true,
+      references: 'organizations(id)',
+      onDelete: 'CASCADE',
     },
-    name: {
-      type: 'varchar(255)',
-      notNull: true
+    parent_id: {
+      type: 'integer',
+      references: 'departments(id)',
+      onDelete: 'SET NULL',
+      default: null,
     },
-    comment: {
-      type: 'text'
-    },
-    is_deleted: {
-      type: 'boolean',
-      default: false
-    }
   });
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('organizations');
+  pgm.dropTable('departments', { ifExists: true });
+  pgm.dropTable('positions', { ifExists: true });
+  pgm.dropTable('organizations', { ifExists: true });
 };
