@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -7,20 +7,73 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 export class EmployeesService {
   constructor(private db: DatabaseService) {}
 
-  async findAll() {
-    const result = await this.db.query(
-      `SELECT * FROM employees
-       WHERE deleted_at IS NULL`,
-    );
+  async findAll(filters?: {
+    first_name?: string;
+    last_name?: string;
+    department_id?: number;
+    status?: 'active' | 'dismissed';
+  }) {
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    let index = 1;
+
+    if (filters?.first_name) {
+      conditions.push(`first_name ILIKE $${index++}`);
+      values.push(`%${filters.first_name}%`);
+    }
+
+    if (filters?.last_name) {
+      conditions.push(`last_name ILIKE $${index++}`);
+      values.push(`%${filters.last_name}%`);
+    }
+
+    if (filters?.department_id) {
+      conditions.push(`department_id = $${index++}`);
+      values.push(filters.department_id);
+    }
+
+    if (filters?.status === 'active') {
+      conditions.push(`deleted_at IS NULL`);
+    }
+
+    if (filters?.status === 'dismissed') {
+      conditions.push(`deleted_at IS NOT NULL`);
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const query = `
+      SELECT *,
+        CASE
+          WHEN deleted_at IS NULL THEN 'active'
+          ELSE 'dismissed'
+        END AS status
+      FROM employees
+      ${whereClause}
+      ORDER BY id
+    `;
+
+    const result = await this.db.query(query, values);
     return result.rows;
   }
 
   async findOne(id: number) {
     const result = await this.db.query(
-      `SELECT * FROM employees
-       WHERE id = $1 AND deleted_at IS NULL`,
+      `SELECT *,
+        CASE
+          WHEN deleted_at IS NULL THEN 'active'
+          ELSE 'dismissed'
+        END AS status
+      FROM employees
+      WHERE id = $1`,
       [id],
     );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundException(`Employee with id=${id} not found`);
+    }
+
     return result.rows[0];
   }
 
@@ -160,6 +213,9 @@ export class EmployeesService {
       values.push(dto.registration_apartment);
     }
 
+    if (fields.length === 0)
+      throw new BadRequestException('No fields to update');
+
     fields.push(`updated_at = NOW()`);
 
     const query = `
@@ -172,16 +228,23 @@ export class EmployeesService {
     values.push(id);
 
     const result = await this.db.query(query, values);
+
+    if (result.rows.length === 0)
+      throw new NotFoundException(`Employee with id=${id} not found or already dismissed`);
+
     return result.rows[0];
   }
 
   async remove(id: number) {
-    await this.db.query(
+    const result = await this.db.query(
       `UPDATE employees
        SET deleted_at = NOW()
        WHERE id = $1`,
       [id],
     );
+
+    if (result.rows.length === 0)
+      throw new NotFoundException(`Employee with id=${id} not found`);
 
     return { message: 'Employee deleted' };
   }

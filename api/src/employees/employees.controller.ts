@@ -11,14 +11,26 @@ import {
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { Query } from '@nestjs/common';
+
 
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Get()
-  findAll() {
-    return this.employeesService.findAll();
+  findAll(
+    @Query('first_name') first_name?: string,
+    @Query('last_name') last_name?: string,
+    @Query('department_id') department_id?: string,
+    @Query('status') status?: 'active' | 'dismissed',
+  ) {
+    return this.employeesService.findAll({
+      first_name,
+      last_name,
+      department_id: department_id ? Number(department_id) : undefined,
+      status,
+    });
   }
 
   @Get(':id')
