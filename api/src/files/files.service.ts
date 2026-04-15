@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
+import { CreateFileRecord } from './types/create-file-record.type';
 
 @Injectable()
 export class FilesService {
@@ -21,10 +21,15 @@ export class FilesService {
        WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
+
+    if (result.rowCount === 0) {
+      throw new NotFoundException(`File with id=${id} not found`);
+    }
+
     return result.rows[0];
   }
 
-  async create(dto: CreateFileDto) {
+  async create(dto: CreateFileRecord) {
     const result = await this.db.query(
       `INSERT INTO files
        (employee_id, name, file_path, created_at, updated_at)
@@ -32,12 +37,13 @@ export class FilesService {
        RETURNING *`,
       [dto.employee_id, dto.name, dto.file_path],
     );
+
     return result.rows[0];
   }
 
   async update(id: number, dto: UpdateFileDto) {
     const fields: string[] = [];
-    const values: (string | number | null)[] = [];
+    const values: Array<string | number | null> = [];
     let index = 1;
 
     if (dto.employee_id !== undefined) {
@@ -50,33 +56,39 @@ export class FilesService {
       values.push(dto.name);
     }
 
-    if (dto.file_path !== undefined) {
-      fields.push(`file_path = $${index++}`);
-      values.push(dto.file_path);
+    if (fields.length === 0) {
+      return this.findOne(id);
     }
 
     fields.push(`updated_at = NOW()`);
-
-    const query = `
-      UPDATE files
-      SET ${fields.join(', ')}
-      WHERE id = $${index} AND deleted_at IS NULL
-      RETURNING *
-    `;
-
     values.push(id);
 
-    const result = await this.db.query(query, values);
+    const result = await this.db.query(
+      `UPDATE files
+       SET ${fields.join(', ')}
+       WHERE id = $${index} AND deleted_at IS NULL
+       RETURNING *`,
+      values,
+    );
+
+    if (result.rowCount === 0) {
+      throw new NotFoundException(`File with id=${id} not found`);
+    }
+
     return result.rows[0];
   }
 
   async remove(id: number) {
-    await this.db.query(
+    const result = await this.db.query(
       `UPDATE files
        SET deleted_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
+
+    if (result.rowCount === 0) {
+      throw new NotFoundException(`File with id=${id} not found`);
+    }
 
     return { message: 'File deleted' };
   }

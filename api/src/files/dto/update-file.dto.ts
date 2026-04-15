@@ -13,7 +13,7 @@ export class UpdateFileDto {
   @MaxLength(255)
   name?: string;
 
-  @IsOptional()
-  @IsString()
-  file_path?: string;
+  // @IsOptional()
+  // @IsString()
+  // file_path?: string;
 }

@@ -11,6 +11,6 @@ export class CreateFileDto {
   @MaxLength(255)
   name: string;
 
-  @IsString()
-  file_path: string;
+  // @IsString()
+  // file_path: string;
 }
