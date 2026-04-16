@@ -2,10 +2,15 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { DatabaseService } from '../database/database.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { AuditLogService } from 'src/audit-log/audit-log.service';
+
 
 @Injectable()
 export class EmployeesService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private auditLogService: AuditLogService,
+  ) {}
 
   async findAll(filters?: {
     first_name?: string;
@@ -70,7 +75,7 @@ export class EmployeesService {
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (result.rowCount === 0) {
       throw new NotFoundException(`Employee with id=${id} not found`);
     }
 
@@ -125,12 +130,25 @@ export class EmployeesService {
       ],
     );
 
-    return result.rows[0];
+    const created = result.rows[0];
+
+    await this.auditLogService.create({
+      user_id: 1,
+      entity_type: 'employee',
+      entity_id: created.id,
+      field_name: 'create',
+      old_value: null,
+      new_value: JSON.stringify(created),
+    });
+
+    return created;
   }
 
   async update(id: number, dto: UpdateEmployeeDto) {
+    const before = await this.findOne(id);
+
     const fields: string[] = [];
-    const values: (string | number | null)[] = [];
+    const values: Array<string | number | null> = [];
     let index = 1;
 
     if (dto.name !== undefined) {
@@ -217,34 +235,56 @@ export class EmployeesService {
       throw new BadRequestException('No fields to update');
 
     fields.push(`updated_at = NOW()`);
-
-    const query = `
-      UPDATE employees
-      SET ${fields.join(', ')}
-      WHERE id = $${index} AND deleted_at IS NULL
-      RETURNING *
-    `;
-
     values.push(id);
 
-    const result = await this.db.query(query, values);
+    const result = await this.db.query( 
+      `UPDATE employees
+       SET ${fields.join(', ')}
+       WHERE id = $${index} AND deleted_at IS NULL
+       RETURNING *`,
+      values,
+    );
 
-    if (result.rows.length === 0)
-      throw new NotFoundException(`Employee with id=${id} not found or already dismissed`);
+    if (result.rowCount === 0) {
+      throw new NotFoundException(`Employee with id=${id} not found`);
+    }
 
-    return result.rows[0];
+    const updated = result.rows[0];
+
+    await this.auditLogService.create({
+      user_id: 1,
+      entity_type: 'employee',
+      entity_id: updated.id,
+      field_name: 'update',
+      old_value: JSON.stringify(before),
+      new_value: JSON.stringify(updated),
+    });
+
+    return updated;
   }
 
   async remove(id: number) {
+    const before = await this.findOne(id);
+
     const result = await this.db.query(
       `UPDATE employees
        SET deleted_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
 
-    if (result.rows.length === 0)
+    if (result.rowCount === 0) {
       throw new NotFoundException(`Employee with id=${id} not found`);
+    }
+
+    await this.auditLogService.create({
+      user_id: 1,
+      entity_type: 'employee',
+      entity_id: id,
+      field_name: 'delete',
+      old_value: JSON.stringify(before),
+      new_value: null,
+    });
 
     return { message: 'Employee deleted' };
   }

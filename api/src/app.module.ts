@@ -8,7 +8,6 @@ import { PositionsModule } from './positions/positions.module';
 import { DatabaseModule } from './database/database.module';
 import { EmployeesModule } from './employees/employees.module';
 import { FilesModule } from './files/files.module';
-import { HrOperationsModule } from './hr-operations/hr-operations.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 
 @Module({
@@ -17,14 +16,13 @@ import { AuditLogModule } from './audit-log/audit-log.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    DatabaseModule,
+    AuditLogModule,
     OrganizationsModule,
     DepartmentsModule,
     PositionsModule,
-    DatabaseModule,
     EmployeesModule,
     FilesModule,
-    HrOperationsModule,
-    AuditLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

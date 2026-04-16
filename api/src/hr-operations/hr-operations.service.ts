@@ -6,10 +6,15 @@ import {
 import { DatabaseService } from '../database/database.service';
 import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
 import { UpdateHrOperationDto } from './dto/update-hr-operation.dto';
+import { AuditLogService } from 'src/audit-log/audit-log.service';
+
 
 @Injectable()
 export class HrOperationsService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private auditLogService: AuditLogService,
+  ) {}
 
   async findAll() {
     const result = await this.db.query(
@@ -28,7 +33,7 @@ export class HrOperationsService {
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (result.rowCount === 0) {
       throw new NotFoundException(`HR operation with id=${id} not found`);
     }
 
@@ -95,22 +100,25 @@ export class HrOperationsService {
       ],
     );
 
-    return result.rows[0];
+    const created = result.rows[0];
+
+    await this.auditLogService.create({
+      user_id: 1,
+      entity_type: 'hr-operation',
+      entity_id: created.id,
+      field_name: 'create',
+      old_value: null,
+      new_value: JSON.stringify(created),
+    });
+
+    return created;
   }
 
   async update(id: number, dto: UpdateHrOperationDto) {
-    const existing = await this.db.query(
-      `SELECT id FROM hr_operations
-       WHERE id = $1 AND deleted_at IS NULL`,
-      [id],
-    );
-
-    if (existing.rows.length === 0) {
-      throw new NotFoundException(`HR operation with id=${id} not found`);
-    }
+    const before = await this.findOne(id);
 
     const fields: string[] = [];
-    const values: (string | number)[] = [];
+    const values: Array<string | number | null> = [];
     let index = 1;
 
     if (dto.employee_id !== undefined) {
@@ -120,7 +128,7 @@ export class HrOperationsService {
         [dto.employee_id],
       );
 
-      if (employee.rows.length === 0) {
+      if (employee.rowCOunt === 0) {
         throw new NotFoundException(
           `Employee with id=${dto.employee_id} not found`,
         );
@@ -137,7 +145,7 @@ export class HrOperationsService {
         [dto.department_id],
       );
 
-      if (department.rows.length === 0) {
+      if (department.rowCount === 0) {
         throw new NotFoundException(
           `Department with id=${dto.department_id} not found`,
         );
@@ -154,7 +162,7 @@ export class HrOperationsService {
         [dto.position_id],
       );
 
-      if (position.rows.length === 0) {
+      if (position.rowCount === 0) {
         throw new NotFoundException(
           `Position with id=${dto.position_id} not found`,
         );
@@ -184,22 +192,37 @@ export class HrOperationsService {
     }
 
     fields.push(`updated_at = NOW()`);
-
-    const query = `
-      UPDATE hr_operations
-      SET ${fields.join(', ')}
-      WHERE id = $${index} AND deleted_at IS NULL
-      RETURNING *
-    `;
-
     values.push(id);
 
-    const result = await this.db.query(query, values);
+    const result = await this.db.query(
+      `UPDATE hr_operations
+       SET ${fields.join(', ')}
+       WHERE id = $${index} AND deleted_at IS NULL
+       RETURNING *`,
+      values,
+    );
 
-    return result.rows[0];
+    if (result.rowCount === 0) {
+      throw new NotFoundException(`HR operation with id=${id} not found`);
+    }
+
+    const updated = result.rows[0];
+
+    await this.auditLogService.create({
+      user_id: 1,
+      entity_type: 'hr-operation',
+      entity_id: updated.id,
+      field_name: 'update',
+      old_value: JSON.stringify(before),
+      new_value: JSON.stringify(updated),
+    });
+
+    return updated;
   }
 
   async remove(id: number) {
+    const before = await this.findOne(id);
+    
     const result = await this.db.query(
       `UPDATE hr_operations
        SET deleted_at = NOW()
@@ -208,9 +231,18 @@ export class HrOperationsService {
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (result.rowCount === 0) {
       throw new NotFoundException(`HR operation with id=${id} not found`);
     }
+
+    await this.auditLogService.create({
+      user_id: 1,
+      entity_type: 'hr-operation',
+      entity_id: id,
+      field_name: 'delete',
+      old_value: JSON.stringify(before),
+      new_value: null,
+    });
 
     return { message: 'HR operation deleted' };
   }

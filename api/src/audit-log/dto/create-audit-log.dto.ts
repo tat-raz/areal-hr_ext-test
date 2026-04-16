@@ -23,14 +23,14 @@ export class CreateAuditLogDto {
   entity_id: number;
 
   @IsString()
-  @MaxLength(255)
+  @MaxLength(100)
   field_name: string;
 
   @IsOptional()
   @IsString()
-  old_value?: string;
+  old_value?: string | null;
 
   @IsOptional()
   @IsString()
-  new_value?: string;
+  new_value?: string | null;
 }

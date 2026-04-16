@@ -7,5 +7,6 @@ import { DatabaseModule } from 'src/database/database.module';
   imports: [DatabaseModule],
   controllers: [AuditLogController],
   providers: [AuditLogService],
+  exports: [AuditLogService],
 })
 export class AuditLogModule {}
