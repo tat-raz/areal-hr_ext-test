@@ -4,10 +4,10 @@ export type EmployeeStatus = 'active' | 'dismissed';
 
 export interface Employee {
   id: number;
-  name: string;
   first_name: string;
   last_name: string;
   middle_name: string | null;
+  full_name: string;
   deleted_at: string | null;
   status?: EmployeeStatus;
 }

@@ -15,11 +15,11 @@ export class EmployeesService {
   async findAll(filters?: {
     first_name?: string;
     last_name?: string;
-    department_id?: number;
+    //department_id?: number;
     status?: 'active' | 'dismissed';
   }) {
     const conditions: string[] = [];
-    const values: (string | number)[] = [];
+    const values: Array<string> = [];
     let index = 1;
 
     if (filters?.first_name) {
@@ -32,10 +32,10 @@ export class EmployeesService {
       values.push(`%${filters.last_name}%`);
     }
 
-    if (filters?.department_id) {
-      conditions.push(`department_id = $${index++}`);
-      values.push(filters.department_id);
-    }
+    // if (filters?.department_id) {
+    //   conditions.push(`department_id = $${index++}`);
+    //   values.push(filters.department_id);
+    // }
 
     if (filters?.status === 'active') {
       conditions.push(`deleted_at IS NULL`);
@@ -48,30 +48,35 @@ export class EmployeesService {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const query = `
-      SELECT *,
+    const result = await this.db.query(
+      `SELECT
+        e.*,
+        CONCAT_WS(' ', e.last_name, e.first_name, e.middle_name) AS full_name,
         CASE
-          WHEN deleted_at IS NULL THEN 'active'
+          WHEN e.deleted_at IS NULL THEN 'active'
           ELSE 'dismissed'
         END AS status
-      FROM employees
+      FROM employees e
       ${whereClause}
-      ORDER BY id
-    `;
+      ORDER BY e.id`,
+      values
+    );
 
-    const result = await this.db.query(query, values);
     return result.rows;
   }
 
   async findOne(id: number) {
     const result = await this.db.query(
-      `SELECT *,
+      `SELECT
+        e.*,
+        CONCAT_WS(' ', e.last_name, e.first_name, e.middle_name) AS full_name,
         CASE
-          WHEN deleted_at IS NULL THEN 'active'
+          WHEN e.deleted_at IS NULL THEN 'active'
           ELSE 'dismissed'
         END AS status
-      FROM employees
-      WHERE id = $1`,
+      FROM employees e
+      WHERE e.id = $1
+      `,
       [id],
     );
 
@@ -85,7 +90,6 @@ export class EmployeesService {
   async create(dto: CreateEmployeeDto) {
     const result = await this.db.query(
       `INSERT INTO employees (
-        name,
         first_name,
         last_name,
         middle_name,
@@ -111,7 +115,6 @@ export class EmployeesService {
       )
       RETURNING *`,
       [
-        dto.name,
         dto.first_name,
         dto.last_name,
         dto.middle_name ?? null,
@@ -151,10 +154,6 @@ export class EmployeesService {
     const values: Array<string | number | null> = [];
     let index = 1;
 
-    if (dto.name !== undefined) {
-      fields.push(`name = $${index++}`);
-      values.push(dto.name);
-    }
 
     if (dto.first_name !== undefined) {
       fields.push(`first_name = $${index++}`);

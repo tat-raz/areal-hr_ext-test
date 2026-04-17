@@ -94,21 +94,9 @@ const columns = [
     align: 'left' as const,
   },
   {
-    name: 'name',
+    name: 'full_name',
     label: 'ФИО',
-    field: 'name',
-    align: 'left' as const,
-  },
-  {
-    name: 'first_name',
-    label: 'Имя',
-    field: 'first_name',
-    align: 'left' as const,
-  },
-  {
-    name: 'last_name',
-    label: 'Фамилия',
-    field: 'last_name',
+    field: 'full_name',
     align: 'left' as const,
   },
   {

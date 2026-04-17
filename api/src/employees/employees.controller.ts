@@ -28,7 +28,7 @@ export class EmployeesController {
     return this.employeesService.findAll({
       first_name,
       last_name,
-      department_id: department_id ? Number(department_id) : undefined,
+      //department_id: department_id ? Number(department_id) : undefined,
       status,
     });
   }
