@@ -9,6 +9,8 @@ import { DatabaseModule } from './database/database.module';
 import { EmployeesModule } from './employees/employees.module';
 import { FilesModule } from './files/files.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
+import { UsersModule } from './users/users.module';
+
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { AuditLogModule } from './audit-log/audit-log.module';
     PositionsModule,
     EmployeesModule,
     FilesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

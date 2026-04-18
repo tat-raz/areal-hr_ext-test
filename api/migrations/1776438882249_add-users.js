@@ -2,7 +2,7 @@ exports.up = (pgm) => {
   pgm.createTable('users', {
     id: 'id',
 
-    emplpoyee_id: {
+    employee_id: {
       type: 'integer',
       notNull: true,
       references: 'employees(id)',
