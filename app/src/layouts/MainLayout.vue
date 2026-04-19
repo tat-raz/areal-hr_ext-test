@@ -35,6 +35,12 @@ const linksList: EssentialLinkProps[] = [
     icon: 'people',
     link: '/employees',
   },
+  {
+    title: 'Пользователи',
+    caption: 'Открыть список пользователей',
+    icon: 'person',
+    link: '/users',
+  },
 ];
 
 const leftDrawerOpen = ref(false);
