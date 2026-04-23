@@ -50,15 +50,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { getUsers, type User } from 'src/services/users';
 
 const users = ref<User[]>([]);
+const filteredUsers = ref<User[]>([]);
 const loading = ref(false);
 const errorMessage = ref('');
 
-const login = ref('');
-const role = ref('');
+const login = ref<string | null>(null);
+const role = ref<string | null>(null);
 
 const roleOptions = [
   { label: 'Администратор', value: 'admin' },
@@ -72,25 +73,26 @@ const columns = [
   { name: 'role_name', label: 'Роль', field: 'role_name' },
 ];
 
-const filteredUsers = computed(() => {
-  return users.value.filter((user) => {
-    const matchesLogin = login.value
-      ? user.login.toLowerCase().includes(login.value.toLowerCase())
-      : true;
-
-    const matchesRole = role.value
-      ? user.role_name === role.value
-      : true;
-
-    return matchesLogin && matchesRole;
-  });
-});
-
 async function loadUsers() {
   try {
     loading.value = true;
     errorMessage.value = '';
+
     users.value = await getUsers();
+
+    const loginQuery = (login.value ?? '').trim().toLowerCase();
+
+    filteredUsers.value = users.value.filter((user) => {
+      const matchesLogin = loginQuery
+        ? user.login.toLowerCase().includes(loginQuery)
+        : true;
+
+      const matchesRole = role.value
+        ? user.role_name === role.value
+        : true;
+
+      return matchesLogin && matchesRole;
+    });
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Ошибка загрузки пользователей';
