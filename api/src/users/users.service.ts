@@ -31,7 +31,7 @@ export class UsersService {
         CONCAT_WS(' ', e.last_name, e.first_name, e.middle_name) AS employee_full_name,
         r.name AS role_name
       FROM users u
-      JOIN employees e ON e.id = u.employee_id
+      JOIN employees e ON e.id = u.employee_id AND e.deleted_at IS NULL
       JOIN roles r ON r.id = u.role_id
       WHERE u.deleted_at IS NULL
       ORDER BY u.id

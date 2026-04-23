@@ -12,7 +12,7 @@ exports.up = (pgm) => {
     role_id: {
       type: 'integer',
       notNull: true,
-      eferences: 'roles(id)',
+      references: 'roles(id)',
       onDelete: 'RESTRICT',
     },
 
