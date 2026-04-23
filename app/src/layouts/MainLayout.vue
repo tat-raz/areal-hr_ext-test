@@ -47,6 +47,12 @@ const linksList: EssentialLinkProps[] = [
     icon: 'business',
     link: '/organizations',
   },
+  {
+    title: 'Департаменты',
+    caption: 'Открыть список департаментов',
+    icon: 'account_tree',
+    link: '/departments',
+  },
 ];
 
 const leftDrawerOpen = ref(false);
