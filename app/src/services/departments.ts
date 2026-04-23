@@ -12,7 +12,7 @@ export interface Department {
 }
 
 export async function getDepartments() {
-    const response = await fetch(`${API_URL}/departmenrs`);
+    const response = await fetch(`${API_URL}/departments`);
 
     if (!response.ok) {
         throw new Error('Не удалось загрузить департаменты');
