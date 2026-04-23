@@ -5,7 +5,7 @@
     <div class="row q-col-gutter-md q-mb-md">
       <div class="col-12 col-md-6">
         <q-input
-          v-model="search"
+          v-model="searchInput"
           label="Поиск по названию"
           outlined
           clearable
@@ -16,7 +16,7 @@
         <q-btn
           color="primary"
           label="Обновить"
-          @click="void loadOrganizations()"
+          @click="applySearch"
         />
       </div>
     </div>
@@ -39,15 +39,14 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import {
-  getOrganizations,
-  type Organization,
-} from 'src/services/organizations';
+import { getOrganizations, type Organization } from 'src/services/organizations';
 
 const organizations = ref<Organization[]>([]);
 const loading = ref(false);
 const errorMessage = ref('');
-const search = ref('');
+
+const searchInput = ref('');
+const appliedSearch = ref('');
 
 const columns = [
   {
@@ -72,11 +71,15 @@ const columns = [
 
 const filteredOrganizations = computed(() => {
   return organizations.value.filter((organization) =>
-    search.value
-      ? organization.name.toLowerCase().includes(search.value.toLowerCase())
+    appliedSearch.value
+      ? organization.name.toLowerCase().includes(appliedSearch.value.toLowerCase())
       : true,
   );
 });
+
+function applySearch() {
+    appliedSearch.value = searchInput.value.trim();
+}
 
 async function loadOrganizations() {
   try {
