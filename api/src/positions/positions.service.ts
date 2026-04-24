@@ -38,7 +38,8 @@ export class PositionsService {
     const result = await this.db.query(
       `INSERT INTO positions 
       (name, comment, created_at, updated_at)
-      VALUES ($1, $2, NOW(), NOW())`,
+      VALUES ($1, $2, NOW(), NOW())
+      RETURNING *`,
       [dto.name, dto.comment ?? null],
     );
     

@@ -53,6 +53,12 @@ const linksList: EssentialLinkProps[] = [
     icon: 'account_tree',
     link: '/departments',
   },
+  {
+    title: 'Должности',
+    caption: 'Открыть список должностей',
+    icon: 'account_tree',
+    link: '/positions',
+  },
 ];
 
 const leftDrawerOpen = ref(false);
