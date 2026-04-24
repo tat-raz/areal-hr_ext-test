@@ -56,8 +56,14 @@ const linksList: EssentialLinkProps[] = [
   {
     title: 'Должности',
     caption: 'Открыть список должностей',
-    icon: 'account_tree',
+    icon: 'badge',
     link: '/positions',
+  },
+  {
+    title: 'Файлы',
+    caption: 'Открыть список файлов',
+    icon: 'description',
+    link: '/files',
   },
 ];
 
