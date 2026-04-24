@@ -65,6 +65,12 @@ const linksList: EssentialLinkProps[] = [
     icon: 'description',
     link: '/files',
   },
+  {
+    title: 'Кадровые операции',
+    caption: 'Открыть список кадровых операций',
+    icon: 'assignment',
+    link: '/hr-operations',
+  },
 ];
 
 const leftDrawerOpen = ref(false);
