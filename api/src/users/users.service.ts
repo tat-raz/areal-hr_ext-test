@@ -269,4 +269,44 @@ export class UsersService {
 
     return { message: 'User deleted' };
   }
+
+  async findByLogin(login: string) {
+    const result = await this.db.query(
+      `
+      SELECT
+        u.id,
+        u.employee_id,
+        u.role_id,
+        u.login,
+        u.password_hash,
+        r.name AS role_name
+      FROM users u
+      JOIN roles r ON r.id = u.role_id
+      WHERE u.login = $1 AND u.deleted_at IS NULL
+      `,
+      [login],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async findAuthUserById(id: number) {
+    const result = await this.db.query(
+      `
+      SELECT
+        u.id,
+        u.employee_id,
+        u.role_id,
+        u.login,
+        r.name AS role_name
+      FROM users u
+      JOIN roles r ON r.id = u.role_id
+      WHERE u.id = $1 AND u.deleted_at IS NULL
+      `,
+      [id],
+    );
+
+    return result.rows[0] ?? null;
 }
+}
+
