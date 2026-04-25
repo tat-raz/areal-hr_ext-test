@@ -11,6 +11,7 @@ import { FilesModule } from './files/files.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { UsersModule } from './users/users.module';
 import { HrOperationsModule } from './hr-operations/hr-operations.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -27,7 +28,8 @@ import { HrOperationsModule } from './hr-operations/hr-operations.module';
     EmployeesModule,
     FilesModule,
     UsersModule,
-    HrOperationsModule
+    HrOperationsModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

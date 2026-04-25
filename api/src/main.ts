@@ -1,6 +1,9 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import session from 'express-session';
+import passport from 'passport';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +20,20 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.use(
+    session({
+      secret: 'hr-app-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 1000 * 60 * 60,
+      },
+    }),
+  );
+
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   await app.listen(process.env.PORT ?? 3000);
 }
