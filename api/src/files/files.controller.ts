@@ -24,8 +24,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('files')
-@UseGuards(AuthenticatedGuard, RolesGuard)
-@Roles('admin', 'hr_manager')
+// @UseGuards(AuthenticatedGuard, RolesGuard)
+// @Roles('admin', 'hr_manager')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 

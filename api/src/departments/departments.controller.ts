@@ -18,8 +18,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('departments')
-@UseGuards(AuthenticatedGuard, RolesGuard)
-@Roles('admin', 'hr_manager')
+// @UseGuards(AuthenticatedGuard, RolesGuard)
+// @Roles('admin', 'hr_manager')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
