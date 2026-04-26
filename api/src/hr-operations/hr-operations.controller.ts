@@ -7,12 +7,19 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards
 } from '@nestjs/common';
 import { HrOperationsService } from './hr-operations.service';
 import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
 import { UpdateHrOperationDto } from './dto/update-hr-operation.dto';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+
 
 @Controller('hr-operations')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class HrOperationsController {
   constructor(private readonly hrOperationsService: HrOperationsService) {}
 

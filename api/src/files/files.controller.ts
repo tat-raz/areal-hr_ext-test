@@ -10,6 +10,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  UseGuards
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -17,9 +18,14 @@ import { extname } from 'path';
 import { FilesService } from './files.service';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('files')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 

@@ -1,9 +1,25 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Patch, 
+  Delete, 
+  Param, 
+  Body,
+  ParseIntPipe,
+  UseGuards
+} from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+
 
 @Controller('organizations')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
@@ -13,8 +29,8 @@ export class OrganizationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizationsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.organizationsService.findOne(id);
   }
 
   @Post()
@@ -23,12 +39,15 @@ export class OrganizationsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateOrganizationDto) {
-    return this.organizationsService.update(+id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() dto: UpdateOrganizationDto,
+  ) {
+    return this.organizationsService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organizationsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.organizationsService.remove(id);
   }
 }

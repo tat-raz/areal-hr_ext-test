@@ -1,20 +1,26 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Param, 
+  Patch, 
+  Delete, 
+  UseGuards, 
+  ParseIntPipe 
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Query } from '@nestjs/common';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('employees')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 

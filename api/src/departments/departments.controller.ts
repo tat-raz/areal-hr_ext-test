@@ -1,17 +1,25 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Param, 
+  Patch, 
   Delete,
+  ParseIntPipe, 
+  UseGuards 
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+
 
 @Controller('departments')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
@@ -21,8 +29,8 @@ export class DepartmentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.departmentsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.departmentsService.findOne(id);
   }
 
   @Post()
@@ -31,12 +39,15 @@ export class DepartmentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateDepartmentDto) {
-    return this.departmentsService.update(+id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() dto: UpdateDepartmentDto,
+  ) {
+    return this.departmentsService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.departmentsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.departmentsService.remove(id);
   }
 }

@@ -23,7 +23,7 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: 'hr-app-secret',
+      secret: process.env.SESSION_SECRET || 'hr-app-secret',
       resave: false,
       saveUninitialized: false,
       cookie: {

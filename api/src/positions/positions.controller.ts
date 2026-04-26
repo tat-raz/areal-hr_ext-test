@@ -6,12 +6,20 @@ import {
   Param,
   Patch,
   Delete,
+  ParseIntPipe,
+  UseGuards
 } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+
 
 @Controller('positions')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}
 
@@ -21,8 +29,8 @@ export class PositionsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.positionsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.positionsService.findOne(id);
   }
 
   @Post()
@@ -31,12 +39,15 @@ export class PositionsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePositionDto) {
-    return this.positionsService.update(+id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() dto: UpdatePositionDto,
+  ) {
+    return this.positionsService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.positionsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.positionsService.remove(id);
   }
 }
