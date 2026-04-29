@@ -10,7 +10,8 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
-  UseGuards
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -24,8 +25,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('files')
-// @UseGuards(AuthenticatedGuard, RolesGuard)
-// @Roles('admin', 'hr_manager')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
@@ -54,6 +55,7 @@ export class FilesController {
   create(
     @Body() dto: CreateFileDto,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req
   ) {
     if (!file) {
       throw new BadRequestException('Файл обязателен');
@@ -63,19 +65,20 @@ export class FilesController {
       employee_id: dto.employee_id,
       name: dto.name,
       file_path: file.path,
-    });
+    }, req.user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateFileDto,
+    @Req() req
   ) {
-    return this.filesService.update(id, dto);
+    return this.filesService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.filesService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.filesService.remove(id, req.user.id);
   }
 }

@@ -33,7 +33,7 @@ export class FilesService {
     return result.rows[0];
   }
 
-  async create(dto: CreateFileRecord) {
+  async create(dto: CreateFileRecord, userId: number) {
     const result = await this.db.query(
       `INSERT INTO files
        (employee_id, name, file_path, created_at, updated_at)
@@ -45,7 +45,7 @@ export class FilesService {
     const created = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'file',
       entity_id: created.id,
       field_name: 'create',
@@ -56,7 +56,7 @@ export class FilesService {
     return created;
   }
 
-  async update(id: number, dto: UpdateFileDto) {
+  async update(id: number, dto: UpdateFileDto, userId: number) {
     const before = await this.findOne(id);
 
     const fields: string[] = [];
@@ -95,7 +95,7 @@ export class FilesService {
     const updated = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'file',
       entity_id: updated.id,
       field_name: 'update',
@@ -106,7 +106,7 @@ export class FilesService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const before = await this.findOne(id);
 
     const result = await this.db.query(
@@ -121,7 +121,7 @@ export class FilesService {
     }
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'file',
       entity_id: id,
       field_name: 'delete',

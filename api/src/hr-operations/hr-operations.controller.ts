@@ -7,7 +7,8 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseGuards
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { HrOperationsService } from './hr-operations.service';
 import { CreateHrOperationDto } from './dto/create-hr-operation.dto';
@@ -18,8 +19,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('hr-operations')
-// @UseGuards(AuthenticatedGuard, RolesGuard)
-// @Roles('admin', 'hr_manager')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class HrOperationsController {
   constructor(private readonly hrOperationsService: HrOperationsService) {}
 
@@ -34,20 +35,21 @@ export class HrOperationsController {
   }
 
   @Post()
-  create(@Body() dto: CreateHrOperationDto) {
-    return this.hrOperationsService.create(dto);
+  create(@Body() dto: CreateHrOperationDto, @Req() req) {
+    return this.hrOperationsService.create(dto, req.user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateHrOperationDto,
+    @Req() req
   ) {
-    return this.hrOperationsService.update(id, dto);
+    return this.hrOperationsService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.hrOperationsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.hrOperationsService.remove(id, req.user.id);
   }
 }

@@ -7,7 +7,8 @@ import {
   Param, 
   Body,
   ParseIntPipe,
-  UseGuards
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -18,8 +19,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('organizations')
-// @UseGuards(AuthenticatedGuard, RolesGuard)
-// @Roles('admin', 'hr_manager')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
@@ -34,20 +35,21 @@ export class OrganizationsController {
   }
 
   @Post()
-  create(@Body() dto: CreateOrganizationDto) {
-    return this.organizationsService.create(dto);
+  create(@Body() dto: CreateOrganizationDto, @Req() req) {
+    return this.organizationsService.create(dto, req.user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number, 
     @Body() dto: UpdateOrganizationDto,
+    @Req() req
   ) {
-    return this.organizationsService.update(id, dto);
+    return this.organizationsService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.organizationsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.organizationsService.remove(id, req.user.id);
   }
 }

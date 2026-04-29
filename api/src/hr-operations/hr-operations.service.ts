@@ -40,7 +40,7 @@ export class HrOperationsService {
     return result.rows[0];
   }
 
-  async create(dto: CreateHrOperationDto) {
+  async create(dto: CreateHrOperationDto, userId: number) {
     const employee = await this.db.query(
       `SELECT id FROM employees
        WHERE id = $1 AND deleted_at IS NULL`,
@@ -103,7 +103,7 @@ export class HrOperationsService {
     const created = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'hr-operation',
       entity_id: created.id,
       field_name: 'create',
@@ -114,7 +114,7 @@ export class HrOperationsService {
     return created;
   }
 
-  async update(id: number, dto: UpdateHrOperationDto) {
+  async update(id: number, dto: UpdateHrOperationDto, userId: number) {
     const before = await this.findOne(id);
 
     const fields: string[] = [];
@@ -128,7 +128,7 @@ export class HrOperationsService {
         [dto.employee_id],
       );
 
-      if (employee.rowCOunt === 0) {
+      if (employee.rowCount === 0) {
         throw new NotFoundException(
           `Employee with id=${dto.employee_id} not found`,
         );
@@ -209,7 +209,7 @@ export class HrOperationsService {
     const updated = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'hr-operation',
       entity_id: updated.id,
       field_name: 'update',
@@ -220,7 +220,7 @@ export class HrOperationsService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const before = await this.findOne(id);
     
     const result = await this.db.query(
@@ -236,7 +236,7 @@ export class HrOperationsService {
     }
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'hr-operation',
       entity_id: id,
       field_name: 'delete',

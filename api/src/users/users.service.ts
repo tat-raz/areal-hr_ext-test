@@ -69,7 +69,7 @@ export class UsersService {
     return result.rows[0];
   }
 
-  async create(dto: CreateUserDto) {
+  async create(dto: CreateUserDto, userId: number) {
     const employee = await this.db.query(
       `SELECT id FROM employees WHERE id = $1 AND deleted_at IS NULL`,
       [dto.employee_id],
@@ -129,7 +129,7 @@ export class UsersService {
     const created = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'user',
       entity_id: created.id,
       field_name: 'create',
@@ -140,7 +140,7 @@ export class UsersService {
     return created;
   }
 
-  async update(id: number, dto: UpdateUserDto) {
+  async update(id: number, dto: UpdateUserDto, userId: number) {
     const before = await this.findOne(id);
 
     const fields: string[] = [];
@@ -231,7 +231,7 @@ export class UsersService {
     const updated = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'user',
       entity_id: updated.id,
       field_name: 'update',
@@ -242,7 +242,7 @@ export class UsersService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const before = await this.findOne(id);
 
     const result = await this.db.query(
@@ -259,7 +259,7 @@ export class UsersService {
     }
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'user',
       entity_id: id,
       field_name: 'delete',

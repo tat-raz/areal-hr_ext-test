@@ -7,7 +7,8 @@ import {
   Patch, 
   Delete,
   ParseIntPipe, 
-  UseGuards 
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -18,8 +19,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('departments')
-// @UseGuards(AuthenticatedGuard, RolesGuard)
-// @Roles('admin', 'hr_manager')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
@@ -34,20 +35,21 @@ export class DepartmentsController {
   }
 
   @Post()
-  create(@Body() dto: CreateDepartmentDto) {
-    return this.departmentsService.create(dto);
+  create(@Body() dto: CreateDepartmentDto, @Req() req) {
+    return this.departmentsService.create(dto, req.user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number, 
     @Body() dto: UpdateDepartmentDto,
+    @Req() req
   ) {
-    return this.departmentsService.update(id, dto);
+    return this.departmentsService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.departmentsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.departmentsService.remove(id, req.user.id);
   }
 }

@@ -34,7 +34,7 @@ export class PositionsService {
     return result.rows[0];
   }
 
-  async create(dto: CreatePositionDto) {
+  async create(dto: CreatePositionDto, userId: number) {
     const result = await this.db.query(
       `INSERT INTO positions 
       (name, comment, created_at, updated_at)
@@ -46,7 +46,7 @@ export class PositionsService {
     const created = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'position',
       entity_id: created.id,
       field_name: 'create',
@@ -57,7 +57,7 @@ export class PositionsService {
     return created;
   }
 
-  async update(id: number, dto: UpdatePositionDto) {
+  async update(id: number, dto: UpdatePositionDto, userId: number) {
     const before = await this.findOne(id);
 
     const fields: string[] = [];
@@ -92,7 +92,7 @@ export class PositionsService {
     const updated = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'position',
       entity_id: updated.id,
       field_name: 'update',
@@ -103,7 +103,7 @@ export class PositionsService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const before = await this.findOne(id);
 
     const result = await this.db.query(
@@ -118,7 +118,7 @@ export class PositionsService {
     }
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'position',
       entity_id: id,
       field_name: 'delete',

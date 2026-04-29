@@ -7,7 +7,8 @@ import {
   Patch,
   Delete,
   ParseIntPipe,
-  UseGuards
+  UseGuards,
+  Req
 } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
@@ -18,8 +19,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('positions')
-// @UseGuards(AuthenticatedGuard, RolesGuard)
-// @Roles('admin', 'hr_manager')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class PositionsController {
   constructor(private readonly positionsService: PositionsService) {}
 
@@ -34,20 +35,21 @@ export class PositionsController {
   }
 
   @Post()
-  create(@Body() dto: CreatePositionDto) {
-    return this.positionsService.create(dto);
+  create(@Body() dto: CreatePositionDto, @Req() req) {
+    return this.positionsService.create(dto, req.user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number, 
     @Body() dto: UpdatePositionDto,
+    @Req() req
   ) {
-    return this.positionsService.update(id, dto);
+    return this.positionsService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.positionsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.positionsService.remove(id, req.user.id);
   }
 }

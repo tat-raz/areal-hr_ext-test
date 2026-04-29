@@ -15,7 +15,6 @@ export class EmployeesService {
   async findAll(filters?: {
     first_name?: string;
     last_name?: string;
-    //department_id?: number;
     status?: 'active' | 'dismissed';
   }) {
     const conditions: string[] = [];
@@ -31,11 +30,6 @@ export class EmployeesService {
       conditions.push(`last_name ILIKE $${index++}`);
       values.push(`%${filters.last_name}%`);
     }
-
-    // if (filters?.department_id) {
-    //   conditions.push(`department_id = $${index++}`);
-    //   values.push(filters.department_id);
-    // }
 
     if (filters?.status === 'active') {
       conditions.push(`deleted_at IS NULL`);
@@ -87,7 +81,7 @@ export class EmployeesService {
     return result.rows[0];
   }
 
-  async create(dto: CreateEmployeeDto) {
+  async create(dto: CreateEmployeeDto, userId: number) {
     const result = await this.db.query(
       `INSERT INTO employees (
         first_name,
@@ -136,7 +130,7 @@ export class EmployeesService {
     const created = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'employee',
       entity_id: created.id,
       field_name: 'create',
@@ -147,7 +141,7 @@ export class EmployeesService {
     return created;
   }
 
-  async update(id: number, dto: UpdateEmployeeDto) {
+  async update(id: number, dto: UpdateEmployeeDto, userId: number) {
     const before = await this.findOne(id);
 
     const fields: string[] = [];
@@ -251,7 +245,7 @@ export class EmployeesService {
     const updated = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'employee',
       entity_id: updated.id,
       field_name: 'update',
@@ -262,7 +256,7 @@ export class EmployeesService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const before = await this.findOne(id);
 
     const result = await this.db.query(
@@ -277,7 +271,7 @@ export class EmployeesService {
     }
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'employee',
       entity_id: id,
       field_name: 'delete',

@@ -7,7 +7,8 @@ import {
   Patch, 
   Delete, 
   UseGuards, 
-  ParseIntPipe 
+  ParseIntPipe,
+  Req
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -19,8 +20,8 @@ import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('employees')
-// @UseGuards(AuthenticatedGuard, RolesGuard)
-// @Roles('admin', 'hr_manager')
+@UseGuards(AuthenticatedGuard, RolesGuard)
+@Roles('admin', 'hr_manager')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
@@ -34,7 +35,6 @@ export class EmployeesController {
     return this.employeesService.findAll({
       first_name,
       last_name,
-      //department_id: department_id ? Number(department_id) : undefined,
       status,
     });
   }
@@ -45,20 +45,21 @@ export class EmployeesController {
   }
 
   @Post()
-  create(@Body() dto: CreateEmployeeDto) {
-    return this.employeesService.create(dto);
+  create(@Body() dto: CreateEmployeeDto, @Req() req) {
+    return this.employeesService.create(dto, req.user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateEmployeeDto,
+    @Req() req
   ) {
-    return this.employeesService.update(id, dto);
+    return this.employeesService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.employeesService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.employeesService.remove(id, req.user.id);
   }
 }

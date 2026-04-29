@@ -34,7 +34,7 @@ export class DepartmentsService {
     return result.rows[0];
   }
 
-  async create(dto: CreateDepartmentDto) {
+  async create(dto: CreateDepartmentDto, userId: number) {
     const result = await this.db.query(
       `INSERT INTO departments
       (name, organization_id, parent_id, comment, created_at, updated_at)
@@ -51,7 +51,7 @@ export class DepartmentsService {
     const created = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'department',
       entity_id: created.id,
       field_name: 'create',
@@ -62,7 +62,7 @@ export class DepartmentsService {
     return created;
   }
 
-  async update(id: number, dto: UpdateDepartmentDto) {
+  async update(id: number, dto: UpdateDepartmentDto, userId: number) {
     const before = await this.findOne(id);
 
     const fields: string[] = [];
@@ -107,7 +107,7 @@ export class DepartmentsService {
     const updated = result.rows[0];
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'department',
       entity_id: updated.id,
       field_name: 'update',
@@ -118,7 +118,7 @@ export class DepartmentsService {
     return updated;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const before = await this.findOne(id);
 
     const result = await this.db.query(
@@ -133,7 +133,7 @@ export class DepartmentsService {
     }
 
     await this.auditLogService.create({
-      user_id: 1,
+      user_id: userId,
       entity_type: 'department',
       entity_id: id,
       field_name: 'delete',
