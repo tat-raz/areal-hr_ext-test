@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface Organization {
   id: number;
@@ -10,7 +10,9 @@ export interface Organization {
 }
 
 export async function getOrganizations() {
-  const response = await fetch(`${API_URL}/organizations`);
+  const response = await fetch(`${API_URL}/organizations`, {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     throw new Error('Не удалось загрузить организации');

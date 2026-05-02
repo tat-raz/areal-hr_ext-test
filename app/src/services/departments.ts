@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface Department {
     id: number;
@@ -12,7 +12,9 @@ export interface Department {
 }
 
 export async function getDepartments() {
-    const response = await fetch(`${API_URL}/departments`);
+    const response = await fetch(`${API_URL}/departments`, {
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error('Не удалось загрузить департаменты');

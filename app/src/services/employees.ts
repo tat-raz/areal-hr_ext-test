@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export type EmployeeStatus = 'active' | 'dismissed';
 
@@ -38,7 +38,9 @@ export async function getEmployees(filters: EmployeeFilters = {}) {
     ? `${API_URL}/employees?${query}`
     : `${API_URL}/employees`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     throw new Error('Не удалось загрузить сотрудников');

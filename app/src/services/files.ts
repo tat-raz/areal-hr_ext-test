@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface File {
     id: number;
@@ -11,7 +11,9 @@ export interface File {
 }
 
 export async function getFiles() {
-    const response = await fetch(`${API_URL}/files`);
+    const response = await fetch(`${API_URL}/files`, {
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error('Не удалось загрузить файлы');

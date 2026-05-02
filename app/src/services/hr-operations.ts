@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface HrOperation {
     id: number;
@@ -14,7 +14,9 @@ export interface HrOperation {
 }
 
 export async function getHrOperations() {
-    const response = await fetch(`${API_URL}/hr-operations`);
+    const response = await fetch(`${API_URL}/hr-operations`, {
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error('Не удалось загрузить кадровые операции');

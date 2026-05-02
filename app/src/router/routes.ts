@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'positions', component: () => import('pages/PositionsPage.vue') },
       { path: 'files', component: () => import('pages/FilesPage.vue') },
       { path: 'hr-operations', component: () => import('pages/HrOperationsPage.vue') },
+      { path: 'login', component: () => import('pages/LoginPage.vue') },
     ],
   },
   {

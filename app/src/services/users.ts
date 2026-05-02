@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface User {
   id: number;
@@ -13,7 +13,9 @@ export interface User {
 }
 
 export async function getUsers() {
-  const response = await fetch(`${API_URL}/users`);
+  const response = await fetch(`${API_URL}/users`, {
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     throw new Error('Не удалось загрузить пользователей');

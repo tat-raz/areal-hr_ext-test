@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface Position {
     id: number;
@@ -11,7 +11,9 @@ export interface Position {
 }
 
 export async function getPositions() {
-    const response = await fetch(`${API_URL}/positions`);
+    const response = await fetch(`${API_URL}/positions`, {
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error('Не удалось загрузить должности');

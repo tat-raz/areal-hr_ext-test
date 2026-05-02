@@ -4,9 +4,13 @@
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title> HR System </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-btn 
+          flat 
+          :label="currentUser ? 'Выйти' : 'Войти'" 
+          @click="handleAuthButton" 
+        />
       </q-toolbar>
     </q-header>
 
@@ -25,8 +29,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { useRouter, useRoute } from 'vue-router';
+import { logout, getCurrentUser } from 'src/services/auth';
+
+const router = useRouter();
+const route = useRoute();
+
+const currentUser = ref(null);
+
+async function loadCurrentUser() {
+  currentUser.value = await getCurrentUser();
+}
+
+async function handleAuthButton() {
+  if (currentUser.value) {
+    await logout();
+    currentUser.value = null;
+    await router.push('/login');
+  } else {
+    await router.push('/login');
+  }
+}
+
+onMounted(() => {
+  void loadCurrentUser();
+});
+
+watch(
+  () => route.fullPath,
+  () => {
+    void loadCurrentUser();
+  },
+);
 
 const linksList: EssentialLinkProps[] = [
   {
