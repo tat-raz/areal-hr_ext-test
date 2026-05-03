@@ -20,3 +20,59 @@ export async function getOrganizations() {
 
   return response.json() as Promise<Organization[]>;
 }
+
+export async function createOrganization(payload: {
+  name: string;
+  comment?: string | null;
+}) {
+  const response = await fetch(`${API_URL}/organizations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error('Не удалось создать организацию');
+  }
+
+  return response.json() as Promise<Organization>;
+}
+
+export async function updateOrganization(
+  id: number,
+  payload: {
+    name: string;
+    comment?: string | null;
+  },
+) {
+  const response = await fetch(`${API_URL}/organizations/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error('Не удалось обновить организацию');
+  }
+
+  return response.json() as Promise<Organization>;
+}
+
+export async function deleteOrganization(id: number) {
+  const response = await fetch(`${API_URL}/organizations/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Не удалось удалить организацию');
+  }
+
+  return response.json();
+}
