@@ -13,17 +13,8 @@
       </div>
 
       <div class="col-12 col-md-8 flex items-end q-gutter-sm">
-        <q-btn
-          color="primary"
-          label="Найти"
-          @click="applySearch"
-        />
-
-        <q-btn
-          color="secondary"
-          label="Добавить"
-          @click="openCreateDialog"
-        />
+        <q-btn color="primary" label="Найти" @click="applySearch" />
+        <q-btn color="secondary" label="Добавить" @click="openCreateDialog" />
       </div>
     </div>
 
@@ -77,11 +68,14 @@
             class="q-mb-md"
           />
 
-          <q-input
-            v-model.number="form.department_id"
-            label="ID департамента"
-            type="number"
+          <q-select
+            v-model="form.department_id"
+            :options="departmentOptions"
+            label="Департамент"
             outlined
+            emit-value
+            map-options
+            clearable
             class="q-mb-md"
           />
 
@@ -111,8 +105,11 @@ import {
   deletePosition,
   type Position,
 } from 'src/services/positions';
+import { getDepartments, type Department } from 'src/services/departments';
 
 const positions = ref<Position[]>([]);
+const departments = ref<Department[]>([]);
+
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -128,6 +125,13 @@ const form = ref({
   comment: '',
 });
 
+const departmentOptions = computed(() =>
+  departments.value.map((department) => ({
+    label: department.name,
+    value: department.id,
+  })),
+);
+
 const columns = [
   {
     name: 'id',
@@ -142,9 +146,9 @@ const columns = [
     align: 'left' as const,
   },
   {
-    name: 'department_id',
+    name: 'department',
     label: 'Департамент',
-    field: (row: Position) => row.department_id ?? '—',
+    field: (row: Position) => getDepartmentName(row.department_id),
     align: 'left' as const,
   },
   {
@@ -169,27 +173,35 @@ const filteredPositions = computed(() => {
   );
 });
 
+function getDepartmentName(id: number | null) {
+  return departments.value.find((department) => department.id === id)?.name ?? '-';
+}
+
 function applySearch() {
   appliedSearch.value = searchInput.value.trim();
 }
 
 function openCreateDialog() {
   editingId.value = null;
+
   form.value = {
     name: '',
     department_id: null,
     comment: '',
   };
+
   dialog.value = true;
 }
 
 function openEditDialog(row: Position) {
   editingId.value = row.id;
+
   form.value = {
     name: row.name,
-    department_id: row.department_id,
+    department_id: row.department_id ?? null,
     comment: row.comment ?? '',
   };
+
   dialog.value = true;
 }
 
@@ -203,9 +215,17 @@ async function savePosition() {
     }
 
     if (editingId.value) {
-      await updatePosition(editingId.value, form.value);
+      await updatePosition(editingId.value, {
+        name: form.value.name,
+        department_id: form.value.department_id,
+        comment: form.value.comment,
+      });
     } else {
-      await createPosition(form.value);
+      await createPosition({
+        name: form.value.name,
+        department_id: form.value.department_id,
+        comment: form.value.comment,
+      });
     }
 
     dialog.value = false;
@@ -235,7 +255,9 @@ async function loadPositions() {
   try {
     loading.value = true;
     errorMessage.value = '';
+
     positions.value = await getPositions();
+    departments.value = await getDepartments();
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Ошибка загрузки должностей';

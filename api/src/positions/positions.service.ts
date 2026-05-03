@@ -74,6 +74,11 @@ export class PositionsService {
       values.push(dto.comment);
     }
 
+    if (dto.department_id !== undefined) {
+      fields.push(`department_id = $${index++}`);
+      values.push(dto.department_id);
+    }
+
     fields.push(`updated_at = NOW()`);
     values.push(id);
 

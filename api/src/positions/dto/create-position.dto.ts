@@ -6,8 +6,8 @@ export class CreatePositionDto {
   @MaxLength(255)
   name: string;
 
-  @IsInt()
   @IsOptional()
+  @IsInt()
   department_id?: number;
 
   @IsOptional()

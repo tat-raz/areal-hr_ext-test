@@ -139,7 +139,15 @@ import {
   type HrOperation,
 } from 'src/services/hr-operations';
 
+import { getEmployees, type Employee } from 'src/services/employees';
+import { getDepartments, type Department } from 'src/services/departments';
+import { getPositions, type Position } from 'src/services/positions';
+
 const hr_operations = ref<HrOperation[]>([]);
+const employees = ref<Employee[]>([]);
+const departments = ref<Department[]>([]);
+const positions = ref<Position[]>([]);
+
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -175,19 +183,19 @@ const columns = [
   {
     name: 'employee_id',
     label: 'Сотрудник',
-    field: 'employee_id',
+    field: (row: HrOperation) => getEmployeeName(row.employee_id),
     align: 'left' as const,
   },
   {
     name: 'department_id',
     label: 'Департамент',
-    field: (row: HrOperation) => row.department_id ?? '-',
+    field: (row: HrOperation) => getDepartmentName(row.department_id),
     align: 'left' as const,
   },
   {
     name: 'position_id',
     label: 'Должность',
-    field: (row: HrOperation) => row.position_id ?? '-',
+    field: (row: HrOperation) => getPositionName(row.position_id),
     align: 'left' as const,
   },
   {
@@ -309,11 +317,26 @@ async function removeHrOperation(id: number) {
   }
 }
 
+function getEmployeeName(id: number | null) {
+  return employees.value.find((item) => item.id === id)?.full_name ?? '-';
+}
+
+function getDepartmentName(id: number | null) {
+  return departments.value.find((item) => item.id === id)?.name ?? '-';
+}
+
+function getPositionName(id: number | null) {
+  return positions.value.find((item) => item.id === id)?.name ?? '-';
+}
+
 async function loadHrOperations() {
   try {
     loading.value = true;
     errorMessage.value = '';
     hr_operations.value = await getHrOperations();
+    employees.value = await getEmployees();
+    departments.value = await getDepartments();
+    positions.value = await getPositions();
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Ошибка загрузки кадровых операций';

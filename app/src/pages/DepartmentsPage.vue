@@ -119,8 +119,10 @@ import {
   deleteDepartment,
   type Department,
 } from 'src/services/departments';
+import { getOrganizations, type Organization } from 'src/services/organizations'
 
 const departments = ref<Department[]>([]);
+const organizations = ref<Organization[]>([]);
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -151,15 +153,15 @@ const columns = [
     align: 'left' as const,
   },
   {
-    name: 'organization_id',
+    name: 'organization',
     label: 'Организация',
-    field: 'organization_id',
+    field: (row: Department) => getOrganizationName(row.organization_id),
     align: 'left' as const,
   },
   {
-    name: 'parent_id',
+    name: 'parent',
     label: 'Родительский департамент',
-    field: (row: Department) => row.parent_id ?? '—',
+    field: (row: Department) => getDepartmentName(row.parent_id),
     align: 'left' as const,
   },
   {
@@ -248,11 +250,20 @@ async function removeDepartment(id: number) {
   }
 }
 
+function getOrganizationName(id: number | null) {
+  return organizations.value.find((item) => item.id === id)?.name ?? '-';
+}
+
+function getDepartmentName(id: number | null) {
+  return departments.value.find((item) => item.id === id)?.name ?? '-';
+}
+
 async function loadDepartments() {
   try {
     loading.value = true;
     errorMessage.value = '';
     departments.value = await getDepartments();
+    organizations.value = await getOrganizations();
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Ошибка загрузки департаментов';

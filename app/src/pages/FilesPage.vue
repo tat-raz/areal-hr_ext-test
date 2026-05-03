@@ -85,8 +85,10 @@ import {
   deleteFile,
   type File,
 } from 'src/services/files';
+import { getEmployees, type Employee } from 'src/services/employees';
 
 const files = ref<File[]>([]);
+const employees = ref<Employee[]>([]);
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -103,11 +105,36 @@ const form = ref({
 });
 
 const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left' as const },
-  { name: 'name', label: 'Название', field: 'name', align: 'left' as const },
-  { name: 'employee_id', label: 'Сотрудник', field: 'employee_id', align: 'left' as const },
-  { name: 'file_path', label: 'Путь к файлу', field: 'file_path', align: 'left' as const },
-  { name: 'actions', label: 'Действия', field: 'actions', align: 'left' as const },
+  { 
+    name: 'id', 
+    label: 'ID', 
+    field: 'id', 
+    align: 'left' as const 
+  },
+  { 
+    name: 'name', 
+    label: 'Название', 
+    field: 'name', 
+    align: 'left' as const 
+  },
+  {
+    name: 'employee',
+    label: 'Сотрудник',
+    field: (row: File) => getEmployeeName(row.employee_id),
+    align: 'left' as const,
+  },
+  { 
+    name: 'file_path', 
+    label: 'Путь к файлу', 
+    field: 'file_path', 
+    align: 'left' as const 
+  },
+  { 
+    name: 'actions', 
+    label: 'Действия', 
+    field: 'actions', 
+    align: 'left' as const 
+  },
 ];
 
 const filteredFiles = computed(() => {
@@ -190,11 +217,16 @@ async function removeFile(id: number) {
   }
 }
 
+function getEmployeeName(id: number | null) {
+  return employees.value.find((item) => item.id === id)?.full_name ?? '-';
+}
+
 async function loadFiles() {
   try {
     loading.value = true;
     errorMessage.value = '';
     files.value = await getFiles();
+    employees.value = await getEmployees();
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Ошибка загрузки файлов';
